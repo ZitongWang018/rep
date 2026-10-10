@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "purpose": "Human-readable migration target; not an executable trainer config",
+  "model": "Qwen/Qwen3-4B-Instruct-2507",
+  "training": {
+    "num_rollout": 400,
+    "num_optimizer_updates": 400,
+    "games_per_rollout": 24,
+    "trajectories_per_game": 16,
+    "hint_plays": 16,
+    "proposer_delay": 8,
+    "regeneration_interval": 8,
+    "active_skills": 3,
+    "total_skills": 6,
+    "games_per_skill": 8,
+    "gpu_count": 4,
+    "gpu_type": "A100-SXM4-40GB",
+    "tensor_parallel": 2,
+    "context_parallel": 2,
+    "pipeline_parallel": 1,
+    "data_parallel": 1,
+    "max_context": 32768,
+    "actor_max_tokens": 8192,
+    "env_max_tokens": 16384,
+    "max_turns": 25,
+    "actor_temperature": 0.6,
+    "env_temperature": 0.6,
+    "backend_logprob_temperature": 1.0,
+    "global_batch_size_nominal": 192,
+    "global_batch_size_effective_actor_only": 384,
+    "global_batch_size_effective_mixed": 408,
+    "reward": {
+      "variant": "blend",
+      "regret_weight": 0.4,
+      "regret_scale": 0.15,
+      "regret_floor_and_clip": [
+        0.0,
+        1.0
+      ],
+      "regret_timing": "regen offset0, same frozen policy, 16 independent plays per arm",
+      "difficulty_weight": 0.6,
+      "difficulty_band": [
+        0.4,
+        0.6
+      ],
+      "difficulty_ramp": 0.25,
+      "difficulty_timing": "all 8 rounds, 128 no-hint plays per environment",
+      "micro_lp_weight": 0.0,
+      "frontier_weight": 0.0,
+      "variance_bonus": false,
+      "actor_normalization": "outcome-only per-environment z-score once",
+      "proposer_normalization": "per-skill mean center once, preserve negative advantages",
+      "upweight": "released auto scale min(384/24*8,50)=50; numeric coefficient undisclosed in paper"
+    },
+    "optimization": {
+      "optimizer": "adam",
+      "lr": 1e-06,
+      "lr_decay_style": "constant",
+      "adam_betas": [
+        0.9,
+        0.98
+      ],
+      "weight_decay": 0.1,
+      "kl_loss_coef": 0.0,
+      "entropy_coef": 0.0,
+      "clip_low": 0.2,
+      "clip_high": 0.28,
+      "use_tis": true,
+      "backend_reward_normalization": false,
+      "backend_advantage_normalization": false
+    },
+    "save_interval": 40,
+    "final_checkpoint_iteration": 399,
+    "environment_memory": {
+      "enabled": true,
+      "capacity": 200,
+      "eviction": "oldest-first",
+      "fresh_for_run": true
+    },
+    "delayed_terminal_boundary": {
+      "rule": "only age>=8 ED trajectories train",
+      "last_pool_generation": 392,
+      "last_pool_due": 400,
+      "last_optimizer_rollout": 399,
+      "unmatured_proposers_not_updated": 24,
+      "early_flush": false,
+      "extra_update_or_rollout": false,
+      "disclosure": "paper does not disclose finite-horizon delayed-buffer handling"
+    },
+    "retained_code_choices_not_disclosed_by_paper": {
+      "hint_writer_temperature": 0.3,
+      "hint_writer_max_tokens": 512,
+      "validator_temperature": 0.3,
+      "validator_max_tokens": 16384,
+      "corpus_word_cap": 4000,
+      "corpus_seed": 42,
+      "malformed_tool_call_token_mask": "released launcher enabled",
+      "designer_upweight_cap": 50,
+      "generation_max_attempts": 80,
+      "generation_walltime_limit_seconds": 3600,
+      "complete_pool_required_before_either_actor_arm": true
+    }
+  },
+  "infrastructure": {
+    "both_episode_walltime_seconds": 1800,
+    "no_hint_concurrency": 128,
+    "save_interval_updates": 40,
+    "retain_latest_complete_pairs": 1,
+    "runtime_sidecar_required": true,
+    "automatic_resume": false,
+    "bit_exact_sglang_restart_claim": false
+  },
+  "evaluation": {
+    "benchmark": "tau2-bench",
+    "historical_commit": "a2c024725189473d2d7cea3a5cfdbcc67478e41f",
+    "split": "base",
+    "trials": 4,
+    "domains": {
+      "retail": {
+        "tasks": 114,
+        "simulations": 456
+      },
+      "airline": {
+        "tasks": 50,
+        "simulations": 200
+      },
+      "telecom": {
+        "tasks": 114,
+        "simulations": 456
+      }
+    },
+    "max_steps": 200,
+    "concurrency": 48,
+    "actor": {
+      "backend": "SGLang",
+      "tool_call_parser": "qwen",
+      "temperature": 0.0,
+      "top_p": 0.8,
+      "top_k": 20,
+      "max_tokens": 16384,
+      "tp": 1,
+      "dp": 1,
+      "mem_fraction_static": 0.7
+    },
+    "user": {
+      "provider_model_id": "deepseek-flash",
+      "temperature": 0.0,
+      "max_tokens": 2048
+    },
+    "natural_language_judge": {
+      "provider_model_id": "deepseek-flash",
+      "temperature": 0.0,
+      "explicit_token_cap": null
+    },
+    "headline": "unweighted mean of three domain success rates",
+    "strict_expected_trial_denominator": 1112,
+    "additional_episode_retries": 0
+  },
+  "scope_limits": [
+    "Table5 is games-specific; tool main recipe uses k8 as stated in S5.3",
+    "later 4B games band0.2-0.4/context49152 switch point is undisclosed, not fabricated for tool run",
+    "tool-specific unpublished per-run adjustments cannot be independently asserted exact",
+    "bounded80 slot retries and exact24 fill/hard3600s deadline policy are local choices; paper gives24 and invalid rejection but not this retry policy",
+    "unmatured terminal ED handling is explicit, undisclosed by paper",
+    "both RA episode arms use local1800s walltime; no turn/token/math changes; persistence and SGLang restart stream are not paper-disclosed or bit-exact",
+    "only tau2 evaluation is requested; BFCL/ACEBench periodic or final scores omitted"
+  ],
+  "paper_exact_reproduction": false
+}
