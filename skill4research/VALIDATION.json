@@ -1,0 +1,26 @@
+{
+  "validation": "stdlib static checks for the simple YAML subset used by this bundle; not official quick_validate.py",
+  "checks": [
+    "required frontmatter",
+    "name and description bounds",
+    "local references exist",
+    "no TODO scaffold",
+    "JSON examples parse",
+    "UI YAML subset and invocation policy"
+  ],
+  "skills": [
+    {
+      "skill": "overnight-research-loop",
+      "status": "pass",
+      "reference_count": 5,
+      "files": 7
+    },
+    {
+      "skill": "paper-reproduction-team",
+      "status": "pass",
+      "reference_count": 2,
+      "files": 4
+    }
+  ],
+  "limitations": "No GPU, scheduler, performance or global discovery validation."
+}

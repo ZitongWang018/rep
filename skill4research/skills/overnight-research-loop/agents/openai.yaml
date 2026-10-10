@@ -1,0 +1,6 @@
+interface:
+  display_name: "持续科研与批判反馈"
+  short_description: "编排提案、idea 把关与独立反思，及时传播反证，学习历史并探索不同机制"
+  default_prompt: "使用 $overnight-research-loop 在约定资源内持续研究，组织独立把关、相互质询、及时反馈与机制多样化。"
+policy:
+  allow_implicit_invocation: true
